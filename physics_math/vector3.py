@@ -2,13 +2,18 @@
 from dataclasses import dataclass
 import math
 
-@dataclass
+@dataclass(frozen=True)
 class Vector3:
+    """A 3D vector with floating-point components, used for physics calculations."""
     x: float = 0.0
     y: float = 0.0
     z: float = 0.0
 
     def __eq__(self, other: "Vector3") -> bool:
+        """
+        Check equality using a small absolute tolerance (1e-9) to account for 
+        floating-point precision errors.
+        """
         if not isinstance(other, Vector3):
             return NotImplemented
 
@@ -49,6 +54,10 @@ class Vector3:
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     def normalize(self) -> "Vector3":
+        """
+        Return a unit vector pointing in the same direction. 
+        Raises ZeroDivisionError if the vector is too small to normalize.
+        """
         magnitude = self.magnitude()
         if abs(magnitude) < 1e-9:
             raise ZeroDivisionError("Cannot normalize a zero vector (magnitude is 0).")
