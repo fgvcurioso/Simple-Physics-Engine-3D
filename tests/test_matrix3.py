@@ -33,9 +33,38 @@ def test_construction_partial_override():
     assert v1 == m1.row1
     assert Vector3(0, 0, 1)== m1.row2
 
-## Verify
+
+def test_construction_wrong_type():
+    v0 = Vector3(1, 2, 3)
+    v1 = Vector3(3, -4.0, -10/2)
+    with pytest.raises(TypeError) as exc:
+        Matrix3(v0, v1, 5)
+    assert "row2" in str(exc.value)
+    assert "Vector3" in str(exc.value)
+    assert "int" in str(exc.value)
 
 # Equality
+def test_equality_trivial():
+    assert Matrix3(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,1)) ==Matrix3()
+
+
+    assert Matrix3(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0.001,1)) != Matrix3()
+    assert Matrix3(Vector3(1.1,0,0), Vector3(0,1,0), Vector3(0,0,1)) != Matrix3()
+    assert Matrix3(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,9999999)) != Matrix3()
+
+    m1 = Matrix3(Vector3(1, 2, 3), Vector3(4, 5, 6), Vector3(7, 8, 9))
+    m2 = Matrix3(Vector3(1, 2, 3), Vector3(4, 5, 6), Vector3(7, 8, 9))
+    assert m1 == m2
+
+def test_equality_wrong_type():
+    v = Vector3(0,0,0)
+    assert Matrix3(v,v,v) != 0
+    assert Matrix3(v,v,v) != [0,0,0]
+
+def test_equality_float_tolerance():
+    row_a = Vector3(1.0, 0.2 + 0.1, 5)
+    row_b = Vector3(1.0, 0.3, 5)
+    assert Matrix3(row_a) == Matrix3(row_b)
 
 # Multiplication with a vector
 
