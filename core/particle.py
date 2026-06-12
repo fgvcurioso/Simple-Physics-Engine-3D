@@ -24,7 +24,7 @@ class Particle:
         self.force_accumulator = self.force_accumulator + new_force
 
     def clear_forces(self) -> None:
-        self.force_accumulator = Vector3(0,0,0)
+        self.force_accumulator = Vector3()
 
     def integrate(self, dt: float | int) -> None:
         if self.is_static:

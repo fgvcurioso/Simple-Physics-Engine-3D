@@ -42,8 +42,8 @@ pytest -v
 ## Roadmap
 
 - [x] Phase 1 — Math primitives (Vector3, Matrix3)
-- [ ] Phase 2 — Particle simulation
-- [ ] Phase 3 — Rigid bodies
+- [x] Phase 2 — Particle simulation
+- [x] Phase 3 — Rigid bodies
 - [ ] Phase 4 — Collision detection
 - [ ] Phase 5 — Collision response
 - [ ] Phase 6 — Renderer
