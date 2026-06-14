@@ -9,7 +9,7 @@ from core.rigidbody import RigidBody
 def rb():
     p = Particle(Vector3(), 1.0)
     inertia = Matrix3(Vector3(2,0,0), Vector3(0,2,0), Vector3(0,0,2))
-    return RigidBody(p, inertia)
+    return RigidBody(particle=p, inertia_tensor=inertia)
 @pytest.fixture
 def rb_1():
     initial_position = Vector3(1,2,3)
@@ -160,6 +160,17 @@ def test_clear_torque_isolation_from_particle(rb):
     assert rb.particle.force_accumulator == linear_force
 
 # Apply force to a point
+def test_apply_force_at_point_static(rb):
+    force = Vector3(0, 230, 0)
+    point = Vector3(2, 0, 0)
+    rb.particle.is_static = True
+    rb.apply_force_at_point(force, point)
+    
+
+    assert rb.particle.force_accumulator == Vector3()
+    assert rb.torque_accumulator == Vector3()
+
+
 def test_apply_force_at_point_basic(rb):
     force = Vector3(0, 10, 0)
     point = Vector3(2, 0, 0)
@@ -220,3 +231,60 @@ def test_apply_force_at_point_moved_body(rb_1):
     rb_1.apply_force_at_point(force, point)
 
     assert rb_1.torque_accumulator == Vector3(0, 0, 10)
+
+# Integrate
+def test_integrate_static_body(rb):
+    rb.particle.is_static = True
+
+    pos_init = rb.particle.position
+    v_init = rb.particle.velocity
+    acc_force_init = rb.particle.force_accumulator
+
+    inertia_tensor_init = rb.inertia_tensor
+    orientation_init = rb.orientation
+    torque_accumulator_init = rb.torque_accumulator
+
+    for i in range(6):
+        rb.apply_force_at_point(force= Vector3(1,2,2), point= Vector3())
+        rb.integrate(i)
+        assert pos_init == rb.particle.position
+        assert v_init == rb.particle.velocity
+        assert acc_force_init == rb.particle.force_accumulator
+        assert orientation_init == rb.orientation
+        assert torque_accumulator_init == rb.torque_accumulator
+        assert inertia_tensor_init == rb.inertia_tensor
+
+
+def test_integrate_no_torque_no_w(rb):
+    for i in range(3):
+        rb.integrate(i)
+        assert Matrix3() == rb.orientation
+
+def test_integrate_no_torque_preserves_angular_velocity(rb):
+    rb.angular_velocity = Vector3(1, 0, 0)  
+    for _ in range(5):
+        rb.integrate(dt=0.1)               
+    assert rb.angular_velocity == Vector3(1, 0, 0)
+
+def test_integrate_constant_torque(rb):
+    force = Vector3(0, 10, 0)
+    point = Vector3(2, 0, 0)
+    w = Vector3()
+    w_m = w.magnitude()
+    dt = 1
+    for _ in range(3):
+        rb.apply_force_at_point(force, point)
+        rb.integrate(dt)
+        w_m_c = rb.angular_velocity.magnitude()
+        assert w_m_c > w_m 
+        w_m = w_m_c
+
+def test_integrate_torque_cleared_after_integration(rb):
+    force = Vector3(0, 10, 0)
+    point = Vector3(2, 0, 0)
+    for _ in range(3):
+        rb.apply_force_at_point(force, point)
+
+    assert rb.torque_accumulator == Vector3(0,0,60)
+    rb.integrate(1)
+    assert rb.torque_accumulator == Vector3()

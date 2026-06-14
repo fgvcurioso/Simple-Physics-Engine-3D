@@ -265,3 +265,25 @@ def test_inverse_singular():
     with pytest.raises(ValueError) as exc:
         m.inverse()
     assert "singular" in str(exc.value)
+
+# Skew symmetric matrix generation
+
+def test_skew_symmetric_basic():
+    w = Vector3(1.0, 2.0, 3.0)
+    v = Vector3(4.0, 5.0, 6.0)
+
+    skew_mat = Matrix3.skew_symmetric(w)
+    matrix_result = skew_mat.transform(v)
+    cross_result = w.cross(v)
+
+    assert matrix_result == cross_result
+
+def test_skew_symmetric_wrong_type():
+    with pytest.raises(TypeError) as err:
+        Matrix3.skew_symmetric((5,6))
+    assert "Vector3" in str(err.value)
+
+def test_skew_symmetric_transpose_is_negation():
+    m = Matrix3.skew_symmetric(Vector3(1, -2, 3))
+    assert m.transpose() == m * -1
+

@@ -25,6 +25,17 @@ class Matrix3:
             if not isinstance(value, Vector3):
                 raise TypeError(f"{name} must be a Vector3, got {type(value).__name__}")
 
+    @classmethod
+    def skew_symmetric(cls, w: Vector3) -> "Matrix3":
+        if not isinstance(w, Vector3):
+            raise TypeError(f"Parameter must be a Vector3, got: {type(w).__name__}")
+
+        return cls(
+        Vector3(0,    -w.z,  w.y),
+        Vector3(w.z,   0,   -w.x),
+        Vector3(-w.y,  w.x,  0)
+    )
+
     def __add__(self, other : "Matrix3") -> "Matrix3":
         if not isinstance(other, Matrix3):
             return NotImplemented
