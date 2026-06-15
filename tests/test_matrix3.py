@@ -287,3 +287,33 @@ def test_skew_symmetric_transpose_is_negation():
     m = Matrix3.skew_symmetric(Vector3(1, -2, 3))
     assert m.transpose() == m * -1
 
+# ortho normalize
+def test_orthonormalize_basic():
+    m = Matrix3()
+    assert m.orthonormalize() == m
+
+
+def test_orthonormalize_sheared_matrix():
+    m = Matrix3(Vector3(1.0, 0.1, 0.0), Vector3(0.0, 1.0, 0.0), Vector3(0.0, 0.0, 1.0))
+    assert m.col0.dot(m.col1) != 0.0 
+    result = m.orthonormalize()
+
+    # All columns must be exactly 90 degrees apart (orthogonal).
+    assert math.isclose(result.col0.dot(result.col1), 0.0, abs_tol=1e-9)
+    assert math.isclose(result.col0.dot(result.col2), 0.0, abs_tol=1e-9)
+    assert math.isclose(result.col1.dot(result.col2), 0.0, abs_tol=1e-9)
+
+    # All columns must be normalized (length = 1.0)
+    assert math.isclose(result.col0.magnitude(), 1.0, abs_tol=1e-9)
+    assert math.isclose(result.col1.magnitude(), 1.0, abs_tol=1e-9)
+    assert math.isclose(result.col2.magnitude(), 1.0, abs_tol=1e-9)
+def test_orthonormalize_drift_correction():
+   
+    v0 = Vector3(5,0,0)
+    v1 = Vector3(0,1,0)
+    v2 = Vector3(0,0,20)
+    m = Matrix3(v0,v1,v2)
+
+    result = m.orthonormalize()
+    expected = Matrix3(v0.normalize(), v1.normalize(), v2.normalize())
+    assert result == expected

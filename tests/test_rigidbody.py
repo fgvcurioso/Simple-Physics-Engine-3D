@@ -3,6 +3,7 @@ from core.particle import Particle
 from physics_math.vector3 import Vector3
 from physics_math.matrix3 import Matrix3
 from core.rigidbody import RigidBody
+import math
 
 # Fixtures
 @pytest.fixture
@@ -288,3 +289,22 @@ def test_integrate_torque_cleared_after_integration(rb):
     assert rb.torque_accumulator == Vector3(0,0,60)
     rb.integrate(1)
     assert rb.torque_accumulator == Vector3()
+
+def test_integrate_orientation_stays_valid(rb):
+    force = Vector3(0, 10, 0)
+    point = Vector3(2, 0, 0)
+    dt = 0.016  # ~60fps
+
+    for _ in range(1000):
+        rb.apply_force_at_point(force, point)
+        rb.integrate(dt)
+
+    # columns must stay unit length
+    assert math.isclose(rb.orientation.col0.magnitude(), 1.0, abs_tol=1e-6)
+    assert math.isclose(rb.orientation.col1.magnitude(), 1.0, abs_tol=1e-6)
+    assert math.isclose(rb.orientation.col2.magnitude(), 1.0, abs_tol=1e-6)
+
+    # columns must stay orthogonal
+    assert math.isclose(rb.orientation.col0.dot(rb.orientation.col1), 0.0, abs_tol=1e-6)
+    assert math.isclose(rb.orientation.col0.dot(rb.orientation.col2), 0.0, abs_tol=1e-6)
+    assert math.isclose(rb.orientation.col1.dot(rb.orientation.col2), 0.0, abs_tol=1e-6)

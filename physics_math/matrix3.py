@@ -105,3 +105,13 @@ class Matrix3:
         cof_m = Matrix3(Vector3(c00,c01,c02), Vector3(c10, c11, c12), Vector3(c20, c21, c22))
         adj = cof_m.transpose()
         return adj * (1/ det)
+
+    def orthonormalize(self) -> "Matrix3":
+        x = self.col0.normalize()
+        z = x.cross(self.col1).normalize()
+        y = z.cross(x)
+        return Matrix3(
+            Vector3(x.x, y.x, z.x),
+            Vector3(x.y, y.y, z.y),
+            Vector3(x.z, y.z, z.z)
+        )

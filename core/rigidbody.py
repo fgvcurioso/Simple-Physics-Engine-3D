@@ -56,7 +56,7 @@ class RigidBody:
         if not isinstance(dt, float | int):
             raise TypeError(f"step/time-interval must be a float, got {type(dt).__name__}")
         if dt < 0 :
-            raise ValueError(f" step value: {dt} can not be negative")
+            raise ValueError(f"Rigid body integrate, step value: {dt} can not be negative")
 
         self.particle.integrate(dt)
 
@@ -64,6 +64,6 @@ class RigidBody:
         self.angular_velocity = self.angular_velocity + angular_acceleration * dt
         
         skew = Matrix3.skew_symmetric(self.angular_velocity)
-        self.orientation = self.orientation + (skew * self.orientation) * dt
+        self.orientation = (self.orientation + (skew * self.orientation) * dt).orthonormalize()
 
         self.clear_torques()
